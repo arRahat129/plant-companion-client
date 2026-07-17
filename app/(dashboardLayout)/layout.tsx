@@ -18,6 +18,7 @@ import {
   Sprout,
   Bug,
   Stethoscope,
+  Plus,
 } from "lucide-react";
 
 // Nav items keyed by role
@@ -33,9 +34,10 @@ const navItemsByRole: Record<
   ],
   user: [
     { name: "My Dashboard", href: "/dashboard/user", icon: User },
-    { name: "My Plants", href: "/plants", icon: Sprout },
+    { name: "My Plants", href: "/dashboard/user/add-plants", icon: Sprout },
     { name: "Disease Check", href: "/disease-check", icon: Bug },
     { name: "Plant Doctor", href: "/plant-doctor", icon: Stethoscope },
+    { name: "Add Plant", href: "/dashboard/user/add-plant", icon: Plus },
     { name: "Settings", href: "/dashboard/user", icon: Settings },
   ],
 };
@@ -110,7 +112,7 @@ export default function DashboardLayout({
   const navItems = navItemsByRole[userRole] ?? navItemsByRole["user"];
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50 transition-colors duration-200">
+    <div className="flex min-h-screen transition-colors duration-200">
       {/* ── Sidebar ── */}
       <aside className="w-64 shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col justify-between py-6 px-4">
         {/* Top section */}
@@ -137,9 +139,8 @@ export default function DashboardLayout({
                 />
                 {/* Role badge — absolute, top-right of avatar */}
                 <span
-                  className={`absolute -top-1.5 -right-1.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full shadow-sm ${
-                    roleBadgeClasses[userRole] ?? "bg-slate-500 text-white"
-                  }`}
+                  className={`absolute -top-1.5 -right-1.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full shadow-sm ${roleBadgeClasses[userRole] ?? "bg-slate-500 text-white"
+                    }`}
                 >
                   {userRole}
                 </span>
@@ -165,11 +166,10 @@ export default function DashboardLayout({
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                    isActive
-                      ? "bg-emerald-600 text-white shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
-                  }`}
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive
+                    ? "bg-emerald-600 text-white shadow-sm"
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
+                    }`}
                 >
                   <Icon size={17} />
                   {item.name}

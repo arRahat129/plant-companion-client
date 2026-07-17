@@ -14,7 +14,9 @@ function SignInForm() {
   const searchParams = useSearchParams();
 
   // Get redirectTo from URL query, default to user dashboard
-  const redirectTo = searchParams.get("redirectTo") || "/dashboard/user";
+  const redirectToParam = searchParams.get("redirectTo") || "/";
+  const isDetailsPage = /^\/plants\/[^/]+$/.test(redirectToParam);
+  const redirectTo = isDetailsPage ? redirectToParam : "/";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
