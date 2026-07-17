@@ -1,14 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-  Button,
-  DropdownItem,
-  DropdownTrigger,
-  Dropdown,
-  DropdownMenu,
-  Avatar,
-} from "@heroui/react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Leaf, Menu, X } from "lucide-react";
@@ -17,13 +9,24 @@ import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
+    
+    // Close dropdown on click outside
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const menuItems = [
@@ -35,23 +38,23 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-divider bg-background/70 backdrop-blur-md px-6 flex justify-center">
+    <nav className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-950/70 backdrop-blur-md px-6 flex justify-center transition-colors duration-200">
       <div className="flex h-16 w-full max-w-7xl items-center justify-between">
         
         {/* Mobile Toggle & Brand */}
         <div className="flex items-center gap-4">
           <button
-            className="sm:hidden text-foreground p-2 -ml-2"
+            className="sm:hidden text-slate-800 dark:text-slate-200 p-2 -ml-2 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
           <Link href="/" className="flex items-center gap-2">
-            <div className="bg-primary p-1.5 rounded-lg text-primary-foreground">
-              <Leaf size={24} />
+            <div className="bg-emerald-600 p-1.5 rounded-lg text-white">
+              <Leaf size={20} />
             </div>
-            <p className="font-bold text-inherit text-xl">PlantCompanion</p>
+            <p className="font-bold text-slate-900 dark:text-white text-xl">PlantCompanion</p>
           </Link>
         </div>
 
@@ -61,7 +64,7 @@ export default function Navbar() {
             <Link
               key={item.name}
               href={item.href}
-              className="text-foreground hover:text-primary transition-colors font-medium text-sm"
+              className="text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-500 transition-colors font-medium text-sm"
             >
               {item.name}
             </Link>
@@ -71,63 +74,74 @@ export default function Navbar() {
         {/* Right Actions */}
         <div className="flex items-center gap-2">
           {mounted && (
-            <Button
-              isIconOnly
-              variant="light"
-              onPress={() => setTheme(theme === "dark" ? "light" : "dark")}
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               aria-label="Toggle theme"
-              className="mr-2 hidden sm:flex"
+              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all mr-2 hidden sm:flex"
             >
               {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-            </Button>
+            </button>
           )}
 
           {session ? (
-            <Dropdown placement="bottom-end">
-              <DropdownTrigger>
-                <div className="flex items-center gap-3 cursor-pointer hover:bg-default-100 p-1.5 pr-3 rounded-full transition-colors">
-                  <Avatar
-                    isBordered
-                    as="button"
-                    className="transition-transform"
-                    color="primary"
-                    size="sm"
-                    src={session.user.image || undefined}
-                    name={session.user.name || "User"}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center gap-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 p-1.5 pr-3 rounded-full transition-colors focus:outline-none"
+              >
+                {session.user.image ? (
+                  <img
+                    className="w-8 h-8 rounded-full object-cover"
+                    src={session.user.image}
+                    alt={session.user.name || "User"}
                   />
-                  <div className="hidden md:flex flex-col items-start">
-                    <span className="text-sm font-semibold leading-tight">{session.user.name}</span>
-                    <span className="text-xs text-default-500 leading-tight">{session.user.email}</span>
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                    {(session.user.name || "U").charAt(0).toUpperCase()}
                   </div>
+                )}
+                <div className="hidden md:flex flex-col items-start text-left">
+                  <span className="text-sm font-semibold leading-tight text-slate-900 dark:text-white">{session.user.name}</span>
+                  <span className="text-xs text-slate-500 leading-tight">{session.user.email}</span>
                 </div>
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Profile Actions" variant="flat">
-                <DropdownItem key="profile" className="h-14 gap-2 md:hidden">
-                  <p className="font-semibold">Signed in as</p>
-                  <p className="font-semibold">{session.user.email}</p>
-                </DropdownItem>
-                <DropdownItem key="dashboard" onPress={() => router.push("/dashboard")}>
-                  Dashboard
-                </DropdownItem>
-                <DropdownItem key="logout" color="danger" onPress={() => signOut()}>
-                  Log Out
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
+              </button>
+
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl py-2 z-50">
+                  <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 md:hidden">
+                    <p className="text-xs text-slate-450">Signed in as</p>
+                    <p className="text-sm font-semibold truncate text-slate-900 dark:text-white">{session.user.email}</p>
+                  </div>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsDropdownOpen(false)}
+                    className="block px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      signOut();
+                    }}
+                    className="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                  >
+                    Log Out
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <>
-              <Link href="/login" className="hidden lg:block text-foreground hover:text-primary transition-colors font-medium text-sm mr-2">
+              <Link href="/auth/signin" className="hidden lg:block text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-500 transition-colors font-medium text-sm mr-4">
                 Login
               </Link>
-              <Button
-                as={Link}
-                color="primary"
-                href="/register"
-                variant="solid"
-                className="font-medium"
+              <Link
+                href="/auth/signup"
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm transition-all shadow-md shadow-emerald-650/10 hover:shadow-emerald-650/20"
               >
                 Register Now
-              </Button>
+              </Link>
             </>
           )}
         </div>
@@ -135,25 +149,24 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="absolute top-16 left-0 w-full border-b border-divider bg-background shadow-lg sm:hidden px-6 py-4 flex flex-col gap-4 z-40">
+        <div className="absolute top-16 left-0 w-full border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-lg sm:hidden px-6 py-4 flex flex-col gap-4 z-40 transition-colors duration-200">
           <div className="flex justify-between items-center mb-2">
-            <span className="font-semibold">Menu</span>
+            <span className="font-semibold text-slate-900 dark:text-white">Menu</span>
             {mounted && (
-              <Button
-                isIconOnly
-                variant="light"
-                onPress={() => setTheme(theme === "dark" ? "light" : "dark")}
+              <button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 aria-label="Toggle theme"
+                className="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-              </Button>
+              </button>
             )}
           </div>
           {menuItems.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className="text-foreground hover:text-primary transition-colors text-lg"
+              className="text-slate-700 dark:text-slate-350 hover:text-emerald-600 transition-colors text-lg"
               onClick={() => setIsMenuOpen(false)}
             >
               {item.name}
@@ -161,8 +174,8 @@ export default function Navbar() {
           ))}
           {!session && (
             <Link 
-              href="/login" 
-              className="text-foreground hover:text-primary transition-colors text-lg mt-2"
+              href="/auth/signin" 
+              className="text-slate-700 dark:text-slate-350 hover:text-emerald-600 transition-colors text-lg mt-2"
               onClick={() => setIsMenuOpen(false)}
             >
               Login

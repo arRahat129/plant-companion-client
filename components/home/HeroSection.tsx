@@ -70,7 +70,7 @@ export default function HeroSection() {
             {/* Placeholder for real image */}
             <div className="absolute inset-0 bg-gradient-to-tr from-secondary/40 to-primary/20 mix-blend-overlay z-10" />
             <img
-              src="https://images.unsplash.com/photo-1416879598555-3fa3a91cc6fa?q=80&w=2000&auto=format&fit=crop"
+              src="https://i.ibb.co.com/JFFsgPVW/Screenshot-2026-07-17-212349.png"
               alt="Beautiful indoor monstera plant"
               className="object-cover w-full h-full"
             />
