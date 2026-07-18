@@ -34,7 +34,7 @@ const navItemsByRole: Record<
   ],
   user: [
     { name: "My Dashboard", href: "/dashboard/user", icon: User },
-    { name: "My Plants", href: "/dashboard/user/add-plants", icon: Sprout },
+    { name: "My Plants", href: "/dashboard/user/my-plants", icon: Sprout },
     { name: "Disease Check", href: "/disease-check", icon: Bug },
     { name: "Plant Doctor", href: "/plant-doctor", icon: Stethoscope },
     { name: "Add Plant", href: "/dashboard/user/add-plant", icon: Plus },
