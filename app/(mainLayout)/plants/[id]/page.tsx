@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { useSession } from "@/lib/auth-client";
 import ImageCarousel from "@/components/plants/ImageCarousel";
 import {
   Leaf,
@@ -98,12 +99,13 @@ export default function PlantDetailPage() {
   const params = useParams();
   const id = params?.id as string;
 
+  const { data: session, isPending: isSessionPending } = useSession();
   const [plant, setPlant]   = useState<Plant | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || !session) return;
     const fetchPlant = async () => {
       try {
         const res = await fetch(`http://localhost:5000/api/plants/${id}`);
@@ -119,9 +121,54 @@ export default function PlantDetailPage() {
       }
     };
     fetchPlant();
-  }, [id]);
+  }, [id, session]);
 
-  /* Loading */
+  /* Session check or loading */
+  if (isSessionPending) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+          <p className="text-sm text-slate-500 dark:text-slate-400">Verifying session…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="max-w-md mx-auto my-20 px-6">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-xl text-center space-y-6">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-400">
+            <Leaf className="w-8 h-8" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-extrabold text-slate-950 dark:text-white">Login Required</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              To view details and specifications of this plant, please sign in to your PlantCompanion account.
+            </p>
+          </div>
+          <Link
+            href={`/auth/signin?redirectTo=${encodeURIComponent(`/plants/${id}`)}`}
+            className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition shadow-md shadow-emerald-600/10 hover:shadow-emerald-600/20"
+          >
+            Sign In to PlantCompanion
+          </Link>
+          <div className="text-xs text-slate-400">
+            Don't have an account?{" "}
+            <Link
+              href={`/auth/signup?redirectTo=${encodeURIComponent(`/plants/${id}`)}`}
+              className="text-emerald-600 hover:underline font-medium"
+            >
+              Register now
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* Loading plant data */
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -293,6 +340,11 @@ export default function PlantDetailPage() {
               <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-0.5 truncate">
                 <Mail className="w-3.5 h-3.5 shrink-0" />
                 {plant.owner.email}
+              </p>
+            )}
+            {plant.owner.id && (
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-mono mt-1 select-all truncate">
+                Seller ID: {plant.owner.id}
               </p>
             )}
           </div>
