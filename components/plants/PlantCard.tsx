@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { Tag, Ruler, ShieldCheck, CheckCircle2, ArrowRight } from "lucide-react";
 
+import { useSession } from "@/lib/auth-client";
+
 interface PlantCardProps {
   plant: {
     _id: string;
@@ -17,13 +19,17 @@ interface PlantCardProps {
     category: string;
     images: string[];
     createdAt: string;
+    status?: string;
+    availability?: string;
     owner: {
+      id?: string;
       name: string;
     };
   };
 }
 
 export default function PlantCard({ plant }: PlantCardProps) {
+  const { data: session } = useSession();
   const imageUrl = plant.images?.[0] || "https://i.ibb.co.com/N0JFXfB/image.png";
 
   const categoryBadge = (cat: string) => {
@@ -38,8 +44,22 @@ export default function PlantCard({ plant }: PlantCardProps) {
     return map[cat] ?? "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
   };
 
+  const isAvailable = plant.availability !== "Not Available";
+  const isOwner = session?.user?.id === plant.owner?.id;
+  const isAdmin = (session?.user as any)?.role === "admin";
+  const canViewDetails = isAvailable || isOwner || isAdmin;
+
   return (
-    <div className="group flex flex-col h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+    <div className="group flex flex-col h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative">
+      {/* Availability overlay */}
+      {!isAvailable && (
+        <div className="absolute inset-0 bg-slate-900/40 z-10 flex flex-col items-center justify-center pointer-events-none">
+          <span className="bg-red-500 text-white font-bold px-4 py-2 rounded-xl shadow-lg -rotate-12 backdrop-blur-sm">
+            Not Available
+          </span>
+        </div>
+      )}
+
       {/* Image Container */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-850">
         <img
@@ -63,7 +83,7 @@ export default function PlantCard({ plant }: PlantCardProps) {
       </div>
 
       {/* Content Container */}
-      <div className="flex flex-col flex-1 p-5 space-y-4">
+      <div className="flex flex-col flex-1 p-5 space-y-4 relative z-20 bg-white dark:bg-slate-900">
         {/* Header (Title & Botanical) */}
         <div className="space-y-1">
           <h3 className="font-bold text-slate-900 dark:text-white text-lg group-hover:text-emerald-600 transition-colors line-clamp-1">
@@ -101,13 +121,19 @@ export default function PlantCard({ plant }: PlantCardProps) {
             </span>
           </div>
           
-          <Link
-            href={`/plants/${plant._id}`}
-            className="flex items-center gap-1 text-xs font-semibold px-3 py-2 bg-slate-50 hover:bg-emerald-650 dark:bg-slate-800 dark:hover:bg-emerald-600 text-slate-700 dark:text-slate-200 hover:text-white dark:hover:text-white rounded-xl transition duration-200"
-          >
-            Details
-            <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
+          {canViewDetails ? (
+            <Link
+              href={`/plants/${plant._id}`}
+              className="flex items-center gap-1 text-xs font-semibold px-3 py-2 bg-slate-50 hover:bg-emerald-650 dark:bg-slate-800 dark:hover:bg-emerald-600 text-slate-700 dark:text-slate-200 hover:text-white dark:hover:text-white rounded-xl transition duration-200"
+            >
+              Details
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          ) : (
+            <span className="flex items-center gap-1 text-xs font-semibold px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-xl cursor-not-allowed">
+              Not Available
+            </span>
+          )}
         </div>
       </div>
     </div>

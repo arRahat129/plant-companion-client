@@ -36,6 +36,8 @@ interface Plant {
   description?: string;
   images: string[];
   createdAt: string;
+  status?: string;
+  availability?: string;
   owner: { id: string; name: string; email: string; image: string };
 }
 
@@ -128,6 +130,26 @@ export default function MyPlantsPage() {
 
   useEffect(() => { fetchPlants(); }, [fetchPlants]);
 
+  /* ── Toggle Availability ───────────────────────────────── */
+  const handleToggleAvailability = async (id: string, newAvailability: string) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/my-plants/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "X-User-ID": userId! },
+        body: JSON.stringify({ availability: newAvailability }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Availability updated");
+        fetchPlants();
+      } else {
+        toast.error(data.message || "Failed to update availability");
+      }
+    } catch {
+      toast.error("Network error");
+    }
+  };
+
   /* ── Search debounce ───────────────────────────────────── */
   useEffect(() => {
     const t = setTimeout(() => { setPage(1); setSearch(searchInput); }, 450);
@@ -216,7 +238,7 @@ export default function MyPlantsPage() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700">
                 <tr>
-                  {["Photo & Name", "Price", "Category", "Added", "Actions"].map((h) => (
+                  {["Photo & Name", "Price", "Category", "Status/Avail.", "Added", "Actions"].map((h) => (
                     <th key={h} className="px-4 py-3 text-left font-semibold text-slate-600 dark:text-slate-400 text-xs uppercase tracking-wide">
                       {h}
                     </th>
@@ -228,6 +250,7 @@ export default function MyPlantsPage() {
                   <TableRow key={plant._id} plant={plant}
                     onEdit={() => setEditPlant(plant)}
                     onDelete={() => setDeletePlant(plant)}
+                    onToggleAvail={(val) => handleToggleAvailability(plant._id, val)}
                   />
                 ))}
               </tbody>
@@ -240,6 +263,7 @@ export default function MyPlantsPage() {
               <PlantCard key={plant._id} plant={plant}
                 onEdit={() => setEditPlant(plant)}
                 onDelete={() => setDeletePlant(plant)}
+                onToggleAvail={(val) => handleToggleAvailability(plant._id, val)}
               />
             ))}
           </div>
@@ -250,6 +274,7 @@ export default function MyPlantsPage() {
               <PlantCard key={plant._id} plant={plant}
                 onEdit={() => setEditPlant(plant)}
                 onDelete={() => setDeletePlant(plant)}
+                onToggleAvail={(val) => handleToggleAvailability(plant._id, val)}
               />
             ))}
           </div>
@@ -280,8 +305,11 @@ export default function MyPlantsPage() {
 }
 
 /* ─── Table Row ──────────────────────────────────────────── */
-function TableRow({ plant, onEdit, onDelete }: { plant: Plant; onEdit: () => void; onDelete: () => void }) {
+function TableRow({ plant, onEdit, onDelete, onToggleAvail }: { plant: Plant; onEdit: () => void; onDelete: () => void; onToggleAvail: (val: string) => void }) {
   const thumb = plant.images?.[0] || DEFAULT_IMG;
+  const status = plant.status || 'pending';
+  const avail = plant.availability || 'Not Available';
+
   return (
     <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
       <td className="px-4 py-3">
@@ -303,15 +331,28 @@ function TableRow({ plant, onEdit, onDelete }: { plant: Plant; onEdit: () => voi
           {plant.category}
         </span>
       </td>
+      <td className="px-4 py-3">
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-semibold uppercase text-slate-500">{status}</span>
+          <span className={`text-xs font-medium ${avail === 'Available' ? 'text-emerald-600' : 'text-red-500'}`}>
+            {avail}
+          </span>
+        </div>
+      </td>
       <td className="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs">{formatDate(plant.createdAt)}</td>
-      <td className="px-4 py-3"><ActionButtons plant={plant} onEdit={onEdit} onDelete={onDelete} /></td>
+      <td className="px-4 py-3">
+        <ActionButtons plant={plant} onEdit={onEdit} onDelete={onDelete} avail={avail} onToggleAvail={onToggleAvail} />
+      </td>
     </tr>
   );
 }
 
 /* ─── Plant Card ─────────────────────────────────────────── */
-function PlantCard({ plant, onEdit, onDelete }: { plant: Plant; onEdit: () => void; onDelete: () => void }) {
+function PlantCard({ plant, onEdit, onDelete, onToggleAvail }: { plant: Plant; onEdit: () => void; onDelete: () => void; onToggleAvail: (val: string) => void }) {
   const thumb = plant.images?.[0] || DEFAULT_IMG;
+  const status = plant.status || 'pending';
+  const avail = plant.availability || 'Not Available';
+
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       <div className="relative h-44 bg-slate-100 dark:bg-slate-800">
@@ -319,16 +360,20 @@ function PlantCard({ plant, onEdit, onDelete }: { plant: Plant; onEdit: () => vo
         <span className={`absolute top-2 left-2 px-2 py-0.5 rounded-full text-xs font-medium ${categoryBadge(plant.category)}`}>
           {plant.category}
         </span>
+        <span className={`absolute top-2 right-2 px-2 py-0.5 rounded-full text-xs font-bold uppercase shadow-sm ${avail === 'Available' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
+          {avail}
+        </span>
       </div>
       <div className="p-4">
         <h3 className="font-semibold text-slate-900 dark:text-white truncate">{plant.title}</h3>
         {plant.botanical && <p className="text-xs italic text-slate-400 mt-0.5 truncate">{plant.botanical}</p>}
+        <p className="text-xs font-semibold text-slate-500 uppercase mt-1">Status: {status}</p>
         <div className="flex items-center justify-between mt-3">
           <span className="text-emerald-700 dark:text-emerald-400 font-bold text-base">${Number(plant.price).toFixed(2)}</span>
           <span className="text-xs text-slate-400">{formatDate(plant.createdAt)}</span>
         </div>
         <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
-          <ActionButtons plant={plant} onEdit={onEdit} onDelete={onDelete} />
+          <ActionButtons plant={plant} onEdit={onEdit} onDelete={onDelete} avail={avail} onToggleAvail={onToggleAvail} />
         </div>
       </div>
     </div>
@@ -336,24 +381,34 @@ function PlantCard({ plant, onEdit, onDelete }: { plant: Plant; onEdit: () => vo
 }
 
 /* ─── Action Buttons ─────────────────────────────────────── */
-function ActionButtons({ plant, onEdit, onDelete }: { plant: Plant; onEdit: () => void; onDelete: () => void }) {
+function ActionButtons({ plant, onEdit, onDelete, avail, onToggleAvail }: { plant: Plant; onEdit: () => void; onDelete: () => void; avail: string; onToggleAvail: (val: string) => void }) {
   return (
-    <div className="flex items-center gap-1.5">
-      <Link
-        href={`/plants/${plant._id}`}
-        title="View details"
-        className="p-2 rounded-xl text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition"
+    <div className="flex items-center gap-2 w-full">
+      <select
+        value={avail}
+        onChange={(e) => onToggleAvail(e.target.value)}
+        className="flex-1 min-w-0 text-xs px-2 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
       >
-        <Eye className="w-4 h-4" />
-      </Link>
-      <button onClick={onEdit} title="Edit plant"
-        className="p-2 rounded-xl text-slate-500 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/30 transition">
-        <Pencil className="w-4 h-4" />
-      </button>
-      <button onClick={onDelete} title="Delete plant"
-        className="p-2 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition">
-        <Trash2 className="w-4 h-4" />
-      </button>
+        <option value="Available">Available</option>
+        <option value="Not Available">Not Available</option>
+      </select>
+      <div className="flex items-center gap-1 shrink-0">
+        <Link
+          href={`/plants/${plant._id}`}
+          title="View details"
+          className="p-1.5 rounded-xl text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition"
+        >
+          <Eye className="w-4 h-4" />
+        </Link>
+        <button onClick={onEdit} title="Edit plant"
+          className="p-1.5 rounded-xl text-slate-500 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/30 transition">
+          <Pencil className="w-4 h-4" />
+        </button>
+        <button onClick={onDelete} title="Delete plant"
+          className="p-1.5 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition">
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 }

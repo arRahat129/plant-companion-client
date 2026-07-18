@@ -21,6 +21,7 @@ import {
   Plus,
   Menu,
   X,
+  Inbox,
 } from "lucide-react";
 
 // Nav items keyed by role
@@ -37,6 +38,7 @@ const navItemsByRole: Record<
   user: [
     { name: "My Dashboard", href: "/dashboard/user", icon: User },
     { name: "My Plants", href: "/dashboard/user/my-plants", icon: Sprout },
+    { name: "Requests", href: "/dashboard/user/requests", icon: Inbox },
     { name: "Disease Check", href: "/disease-check", icon: Bug },
     { name: "Plant Doctor", href: "/plant-doctor", icon: Stethoscope },
     { name: "Add Plant", href: "/dashboard/user/add-plant", icon: Plus },

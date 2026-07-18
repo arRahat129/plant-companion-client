@@ -6,6 +6,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { useSession } from "@/lib/auth-client";
 import ImageCarousel from "@/components/plants/ImageCarousel";
+import RequestPlantModal from "@/components/plants/RequestPlantModal";
 import {
   Leaf,
   Tag,
@@ -41,6 +42,7 @@ interface Plant {
   petSafe: boolean;
   category: string;
   description?: string;
+  availability?: string;
   images: string[];
   createdAt: string;
   owner: {
@@ -103,6 +105,7 @@ export default function PlantDetailPage() {
   const [plant, setPlant]   = useState<Plant | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
 
   useEffect(() => {
     if (!id || !session) return;
@@ -201,6 +204,10 @@ export default function PlantDetailPage() {
     );
   }
 
+  const isOwner = session?.user?.id === plant.owner.id;
+  const isAdmin = (session?.user as any)?.role === "admin";
+  const isAvailable = plant.availability !== "Not Available";
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10">
       {/* Breadcrumb */}
@@ -290,6 +297,15 @@ export default function PlantDetailPage() {
               }
             />
             <DetailRow
+              icon={Package}
+              label="Availability"
+              value={
+                <span className={isAvailable ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-red-500 font-semibold"}>
+                  {plant.availability || "Not Available"}
+                </span>
+              }
+            />
+            <DetailRow
               icon={CalendarDays}
               label="Listed On"
               value={formatDate(plant.createdAt)}
@@ -311,14 +327,37 @@ export default function PlantDetailPage() {
             </div>
           )}
 
-          {/* Contact Seller — placeholder */}
-          <button
-            onClick={() => toast("Contact feature coming soon!", { icon: "💬" })}
-            className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition-colors shadow-sm"
-          >
-            <MessageCircle className="w-5 h-5" />
-            Contact Seller
-          </button>
+          {/* Contact / Request action */}
+          {isOwner ? (
+            <div className="w-full bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4 text-center">
+              <h3 className="text-emerald-800 dark:text-emerald-300 font-bold mb-1 flex items-center justify-center gap-2">
+                <CheckCircle2 className="w-5 h-5" /> This is your plant
+              </h3>
+              <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                You can manage this listing from your dashboard.
+              </p>
+            </div>
+          ) : isAdmin ? (
+            <div className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-center">
+              <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                Admin accounts do not have the authority to request plants. Please sign in as a standard user to request.
+              </p>
+            </div>
+          ) : isAvailable ? (
+            <button
+              onClick={() => setShowRequestModal(true)}
+              className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition-colors shadow-sm"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Contact Seller to Request
+            </button>
+          ) : (
+            <div className="w-full bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-2xl p-4 text-center">
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                This plant is currently Not Available.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -349,16 +388,26 @@ export default function PlantDetailPage() {
             )}
           </div>
 
-          {/* Contact placeholder */}
-          <button
-            onClick={() => toast("Contact feature coming soon!", { icon: "💬" })}
-            className="shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border border-emerald-500 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition"
-          >
-            <MessageCircle className="w-4 h-4" />
-            Message
-          </button>
+          {/* Message Action (Hide for owner) */}
+          {!isOwner && isAvailable && !isAdmin && (
+            <button
+              onClick={() => setShowRequestModal(true)}
+              className="shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border border-emerald-500 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Message
+            </button>
+          )}
         </div>
       </div>
+
+      {showRequestModal && session && session.user && (
+        <RequestPlantModal
+          plant={plant}
+          sessionUser={session.user as any}
+          onClose={() => setShowRequestModal(false)}
+        />
+      )}
     </div>
   );
 }
