@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient } from "mongodb";
 
-// Prevent connecting multiple times in development
+// Prevent connecting multiple times in development (HMR protection)
 const globalForMongo = global as unknown as { mongoClient: MongoClient };
 
 const uri = process.env.MONGODB_URI as string;
@@ -19,24 +19,37 @@ if (process.env.NODE_ENV !== "production") {
 const db = client.db(process.env.DB_NAME || "plant_companion");
 
 export const auth = betterAuth({
+    // The URL where this Next.js app (and its /api/auth handler) is running
+    baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+
+    // Allow the frontend origin to make auth requests
+    trustedOrigins: [
+        process.env.BETTER_AUTH_URL || "http://localhost:3000",
+    ],
+
+    secret: process.env.BETTER_AUTH_SECRET,
+
     database: mongodbAdapter(db),
+
     emailAndPassword: {
         enabled: true,
     },
+
     user: {
         additionalFields: {
             role: {
                 type: "string",
                 required: false,
                 defaultValue: "user",
-                input: true, // Allow client to set role during signup
+                input: false, // Never let the client set role — only admins can promote
             },
         },
     },
+
     socialProviders: {
         google: {
-            clientId: process.env.GOOGLE_CLIENT_ID as string || "PLACEHOLDER_CLIENT_ID",
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string || "PLACEHOLDER_CLIENT_SECRET",
-        }
-    }
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+        },
+    },
 });

@@ -17,7 +17,6 @@ function SignUpForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [role, setRole] = useState("user");
   
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -171,7 +170,6 @@ function SignUpForm() {
         password,
         name: mergedName,
         image: finalImageUrl,
-        role, // pass role to better-auth
         callbackURL: redirectTo,
       });
 
@@ -361,36 +359,6 @@ function SignUpForm() {
           </div>
         </div>
 
-        {/* Role Selection */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-            Account Type
-          </label>
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="role"
-                value="user"
-                checked={role === "user"}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-slate-300"
-              />
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">User</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="role"
-                value="admin"
-                checked={role === "admin"}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-slate-300"
-              />
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Admin</span>
-            </label>
-          </div>
-        </div>
 
         {/* Password error messaging */}
         {passwordError && (
