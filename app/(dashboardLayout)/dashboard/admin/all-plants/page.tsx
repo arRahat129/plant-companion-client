@@ -124,7 +124,7 @@ function SendFeedbackModal({
     }
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/feedbacks", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/feedbacks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -349,7 +349,7 @@ export default function AdminAllPlantsPage() {
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean; title: string; message: string; confirmLabel: string;
     confirmClass: string; action: () => Promise<void>;
-  }>({ open: false, title: "", message: "", confirmLabel: "", confirmClass: "", action: async () => {} });
+  }>({ open: false, title: "", message: "", confirmLabel: "", confirmClass: "", action: async () => { } });
 
   const [feedbackPlant, setFeedbackPlant] = useState<Plant | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -379,7 +379,7 @@ export default function AdminAllPlantsPage() {
       if (search) q.set("search", search);
       if (statusFilter !== "All") q.set("status", statusFilter);
 
-      const res = await fetch(`http://localhost:5000/api/admin/plants?${q.toString()}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/plants?${q.toString()}`);
       const data = await res.json();
       if (data.success) {
         setPlants(data.plants);
@@ -436,7 +436,7 @@ export default function AdminAllPlantsPage() {
       action: async () => {
         setActionLoading(plant._id + newStatus);
         try {
-          const res = await fetch(`http://localhost:5000/api/admin/plants/${plant._id}/status`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/plants/${plant._id}/status`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ status: newStatus }),
@@ -468,7 +468,7 @@ export default function AdminAllPlantsPage() {
       action: async () => {
         setActionLoading(plant._id + "delete");
         try {
-          const res = await fetch(`http://localhost:5000/api/admin/plants/${plant._id}`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/plants/${plant._id}`, {
             method: "DELETE",
           });
           const data = await res.json();
@@ -731,11 +731,10 @@ export default function AdminAllPlantsPage() {
               <button
                 key={p}
                 onClick={() => setPage(p)}
-                className={`w-9 h-9 rounded-xl text-xs font-bold transition ${
-                  p === page
-                    ? "bg-emerald-600 text-white shadow-md"
-                    : "border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-                }`}
+                className={`w-9 h-9 rounded-xl text-xs font-bold transition ${p === page
+                  ? "bg-emerald-600 text-white shadow-md"
+                  : "border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  }`}
               >
                 {p}
               </button>

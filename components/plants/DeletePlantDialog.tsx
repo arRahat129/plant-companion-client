@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { X, Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { API_BASE } from "@/lib/apiBase";
 
 interface DeletePlantDialogProps {
   plant: { _id: string; title: string };
@@ -23,7 +24,7 @@ export default function DeletePlantDialog({
     setDeleting(true);
     try {
       const res = await fetch(
-        `http://localhost:5000/api/my-plants/${plant._id}`,
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/my-plants/${plant._id}`,
         { method: "DELETE", credentials: "include", headers: { "X-User-ID": userId } }
       );
       const json = await res.json();

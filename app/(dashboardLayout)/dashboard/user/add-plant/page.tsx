@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { Upload, X, Loader2, Plus } from "lucide-react";
 
 const DEFAULT_IMAGE = "https://i.ibb.co.com/N0JFXfB/image.png";
-
+import { API_BASE } from '@/lib/apiBase';
 /** Upload a single File to our /api/upload proxy → ImgBB and return the URL */
 async function uploadImageToImgBB(file: File): Promise<string> {
   const form = new FormData();
@@ -116,7 +116,7 @@ export default function AddPlantPage() {
         userImage:   (session.user as any).image ?? "",
       };
 
-      const res = await fetch("http://localhost:5000/api/add-plant", {
+      const res = await fetch(`${API_BASE}/api/add-plant`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

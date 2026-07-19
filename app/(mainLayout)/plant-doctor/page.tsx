@@ -53,7 +53,7 @@ export default function PlantDoctorPage() {
     scrollToBottom();
 
     try {
-      const res = await fetch("http://localhost:5000/api/plantdoctor/chat", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/plantdoctor/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

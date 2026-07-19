@@ -3,6 +3,7 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import toast from "react-hot-toast";
 import { X, Upload, Loader2, RotateCcw, Save } from "lucide-react";
+import { API_BASE } from "@/lib/apiBase";
 
 interface Plant {
   _id: string;
@@ -106,7 +107,7 @@ export default function EditPlantModal({ plant, userId, onClose, onSaved }: Edit
 
       if (finalImages.length === 0) finalImages = [DEFAULT_IMAGE];
 
-      const res = await fetch(`http://localhost:5000/api/my-plants/${plant._id}`, {
+      const res = await fetch(`${API_BASE}/api/my-plants/${plant._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", "X-User-ID": userId },
         credentials: "include",

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { X, Loader2, Send } from "lucide-react";
+import { API_BASE } from "@/lib/apiBase";
 
 interface RequestPlantModalProps {
   plant: {
@@ -71,7 +72,7 @@ export default function RequestPlantModal({ plant, sessionUser, onClose }: Reque
         }
       };
 
-      const res = await fetch("http://localhost:5000/api/requests", {
+      const res = await fetch(`${API_BASE}/api/requests`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

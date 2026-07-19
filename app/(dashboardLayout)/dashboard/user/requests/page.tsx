@@ -21,7 +21,7 @@ export default function RequestsPage() {
     if (!userId) return;
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/requests", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/requests`, {
         headers: { "X-User-ID": userId },
       });
       const data = await res.json();
@@ -71,17 +71,15 @@ export default function RequestsPage() {
         <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
           <button
             onClick={() => setActiveTab("incoming")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${
-              activeTab === "incoming" ? "bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${activeTab === "incoming" ? "bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              }`}
           >
             <Inbox className="w-4 h-4" /> Incoming ({incoming.length})
           </button>
           <button
             onClick={() => setActiveTab("outgoing")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${
-              activeTab === "outgoing" ? "bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${activeTab === "outgoing" ? "bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              }`}
           >
             <Send className="w-4 h-4" /> Sent ({outgoing.length})
           </button>
@@ -159,7 +157,7 @@ export default function RequestsPage() {
                     <StatusIcon status={req.status} /> {req.status}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center gap-2 mb-4 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                   <img src={(activeTab === "incoming" ? req.requester : req.owner).image || "https://i.ibb.co.com/N0JFXfB/image.png"} className="w-8 h-8 rounded-full object-cover bg-slate-200" alt="" />
                   <div>

@@ -43,12 +43,12 @@ interface Plant {
 
 const CATEGORIES = ["All", "Indoor", "Outdoor", "Succulent", "Fern", "Air Plant", "Flowering"];
 const SORT_OPTIONS = [
-  { label: "Newest First",      value: "createdAt-desc" },
-  { label: "Oldest First",      value: "createdAt-asc"  },
-  { label: "Price: High → Low", value: "price-desc"     },
-  { label: "Price: Low → High", value: "price-asc"      },
-  { label: "Name A–Z",          value: "title-asc"      },
-  { label: "Name Z–A",          value: "title-desc"     },
+  { label: "Newest First", value: "createdAt-desc" },
+  { label: "Oldest First", value: "createdAt-asc" },
+  { label: "Price: High → Low", value: "price-desc" },
+  { label: "Price: Low → High", value: "price-asc" },
+  { label: "Name A–Z", value: "title-asc" },
+  { label: "Name Z–A", value: "title-desc" },
 ];
 const DEFAULT_IMG = "https://i.ibb.co.com/N0JFXfB/image.png";
 
@@ -59,12 +59,12 @@ function formatDate(iso: string) {
 }
 function categoryBadge(cat: string) {
   const map: Record<string, string> = {
-    Indoor:     "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
-    Outdoor:    "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300",
-    Succulent:  "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
-    Fern:       "bg-lime-100 text-lime-800 dark:bg-lime-900/40 dark:text-lime-300",
-    "Air Plant":"bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300",
-    Flowering:  "bg-pink-100 text-pink-800 dark:bg-pink-900/40 dark:text-pink-300",
+    Indoor: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+    Outdoor: "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300",
+    Succulent: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+    Fern: "bg-lime-100 text-lime-800 dark:bg-lime-900/40 dark:text-lime-300",
+    "Air Plant": "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300",
+    Flowering: "bg-pink-100 text-pink-800 dark:bg-pink-900/40 dark:text-pink-300",
   };
   return map[cat] ?? "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
 }
@@ -74,18 +74,18 @@ export default function MyPlantsPage() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
 
-  const [plants, setPlants]         = useState<Plant[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [total, setTotal]           = useState(0);
-  const [page, setPage]             = useState(1);
+  const [plants, setPlants] = useState<Plant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch]           = useState("");
-  const [category, setCategory]       = useState("All");
-  const [sort, setSort]               = useState("createdAt-desc");
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
+  const [sort, setSort] = useState("createdAt-desc");
 
-  const [editPlant, setEditPlant]     = useState<Plant | null>(null);
+  const [editPlant, setEditPlant] = useState<Plant | null>(null);
   const [deletePlant, setDeletePlant] = useState<Plant | null>(null);
 
   const userId = (session?.user as any)?.id as string | undefined;
@@ -97,16 +97,16 @@ export default function MyPlantsPage() {
     try {
       const [sortBy, order] = sort.split("-");
       const params = new URLSearchParams({
-        page:  String(page),
+        page: String(page),
         limit: "10",
         sortBy,
         order,
-        ...(search             ? { search }   : {}),
+        ...(search ? { search } : {}),
         ...(category !== "All" ? { category } : {}),
       });
 
       const res = await fetch(
-        `http://localhost:5000/api/my-plants?${params}`,
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/my-plants?${params}`,
         {
           credentials: "include",
           headers: { "X-User-ID": userId }, // ← the real fix
@@ -133,7 +133,7 @@ export default function MyPlantsPage() {
   /* ── Toggle Availability ───────────────────────────────── */
   const handleToggleAvailability = async (id: string, newAvailability: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/my-plants/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/my-plants/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", "X-User-ID": userId! },
         body: JSON.stringify({ availability: newAvailability }),

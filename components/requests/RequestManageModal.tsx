@@ -3,7 +3,7 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { X, Calendar, MessageSquare, Mail, User, Info, Check, Trash2, Edit2, Save } from "lucide-react";
-import { useSession } from "@/lib/auth-client";
+import { API_BASE } from "@/lib/apiBase";
 
 interface RequestManageModalProps {
   request: any;
@@ -32,7 +32,7 @@ export default function RequestManageModal({ request, mode, onClose, onRefresh }
     setLoading(true);
     try {
       if (actionType === "delete") {
-        const res = await fetch(`http://localhost:5000/api/requests/${request._id}`, {
+        const res = await fetch(`${API_BASE}/api/requests/${request._id}`, {
           method: "DELETE",
           headers: { "X-User-ID": userId },
         });
@@ -44,7 +44,7 @@ export default function RequestManageModal({ request, mode, onClose, onRefresh }
         } else toast.error(data.message);
       } else if (actionType === "approve" || actionType === "reject") {
         const status = actionType === "approve" ? "accepted" : "rejected";
-        const res = await fetch(`http://localhost:5000/api/requests/${request._id}`, {
+        const res = await fetch(`${API_BASE}/api/requests/${request._id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json", "X-User-ID": userId },
           body: JSON.stringify({ status }),
@@ -56,7 +56,7 @@ export default function RequestManageModal({ request, mode, onClose, onRefresh }
           onClose();
         } else toast.error(data.message);
       } else if (actionType === "edit") {
-        const res = await fetch(`http://localhost:5000/api/requests/${request._id}`, {
+        const res = await fetch(`${API_BASE}/api/requests/${request._id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json", "X-User-ID": userId },
           body: JSON.stringify({ message, contactInfo, pickupDate }),

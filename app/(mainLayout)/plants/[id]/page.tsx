@@ -61,11 +61,11 @@ function formatDate(iso: string) {
 }
 function categoryBadge(cat: string) {
   const map: Record<string, string> = {
-    Indoor:    "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
-    Outdoor:   "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300",
+    Indoor: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+    Outdoor: "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300",
     Succulent: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
-    Fern:      "bg-lime-100 text-lime-800 dark:bg-lime-900/40 dark:text-lime-300",
-    "Air Plant":"bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300",
+    Fern: "bg-lime-100 text-lime-800 dark:bg-lime-900/40 dark:text-lime-300",
+    "Air Plant": "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300",
     Flowering: "bg-pink-100 text-pink-800 dark:bg-pink-900/40 dark:text-pink-300",
   };
   return map[cat] ?? "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
@@ -102,7 +102,7 @@ export default function PlantDetailPage() {
   const id = params?.id as string;
 
   const { data: session, isPending: isSessionPending } = useSession();
-  const [plant, setPlant]   = useState<Plant | null>(null);
+  const [plant, setPlant] = useState<Plant | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
@@ -111,7 +111,7 @@ export default function PlantDetailPage() {
     if (!id || !session) return;
     const fetchPlant = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/plants/${id}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/plants/${id}`);
         if (res.status === 404) { setNotFound(true); return; }
         const json = await res.json();
         if (json.success) setPlant(json.plant);
@@ -277,11 +277,11 @@ export default function PlantDetailPage() {
 
           {/* Detail rows */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm">
-            <DetailRow icon={Tag}        label="Category"         value={plant.category} />
-            <DetailRow icon={Ruler}      label="Pot Diameter"     value={plant.potSize} />
+            <DetailRow icon={Tag} label="Category" value={plant.category} />
+            <DetailRow icon={Ruler} label="Pot Diameter" value={plant.potSize} />
             <DetailRow icon={TrendingUp} label="Growth Condition" value={plant.growth} />
-            <DetailRow icon={Sun}        label="Light Requirement" value={plant.light} />
-            <DetailRow icon={Package}    label="Stock / Quantity"  value={`${plant.quantity} available`} />
+            <DetailRow icon={Sun} label="Light Requirement" value={plant.light} />
+            <DetailRow icon={Package} label="Stock / Quantity" value={`${plant.quantity} available`} />
             <DetailRow
               icon={ShieldCheck}
               label="Pet Safety"

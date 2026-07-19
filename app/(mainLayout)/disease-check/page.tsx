@@ -41,7 +41,7 @@ export default function DiseaseCheckPage() {
   // Fetch scan count on mount or session changes
   useEffect(() => {
     if (session?.user?.id) {
-      fetch("http://localhost:5000/api/diseases/count", {
+      fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/diseases/count`, {
         headers: {
           "x-user-id": session.user.id,
         },
@@ -108,7 +108,7 @@ export default function DiseaseCheckPage() {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL("image/jpeg");
         setImage(dataUrl);
-        
+
         // Convert to file
         const blobBin = atob(dataUrl.split(',')[1]);
         const array = [];
@@ -117,7 +117,7 @@ export default function DiseaseCheckPage() {
         }
         const file = new File([new Uint8Array(array)], `camera_${Date.now()}.jpg`, { type: "image/jpeg" });
         setRawFile(file);
-        
+
         // Stop stream
         stopCamera();
       }
@@ -219,7 +219,7 @@ export default function DiseaseCheckPage() {
       // Extract the base64 string safely out of the data URL
       const base64Data = image.split(",")[1];
 
-      const response = await fetch("http://localhost:5000/api/diseases/scan", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/diseases/scan`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -387,7 +387,7 @@ export default function DiseaseCheckPage() {
                 </div>
               ) : (
                 <div className="w-full flex flex-col items-center justify-center">
-                  <label 
+                  <label
                     className="flex flex-col items-center justify-center cursor-pointer text-center group w-full py-8"
                     onClick={(e) => {
                       if (!session?.user) {

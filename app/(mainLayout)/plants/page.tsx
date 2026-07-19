@@ -79,7 +79,7 @@ function PlantsDirectory() {
         query.set("page", String(page));
         query.set("limit", "9");
 
-        const res = await fetch(`http://localhost:5000/api/plants?${query.toString()}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/plants?${query.toString()}`);
         const data = await res.json();
         if (data.success) {
           setPlants(data.plants);
@@ -133,7 +133,7 @@ function PlantsDirectory() {
 
   const categories = ["All", "Indoor", "Outdoor", "Succulent", "Fern", "Air Plant", "Flowering"];
   const potSizes = ["All", "2-inch", "4-inch", "6-inch", "8-inch", "10-inch+"];
-  
+
   // Custom sorting selections
   const currentSortValue = `${sortBy}-${sortOrder}`;
   const handleSortChange = (value: string) => {
@@ -155,7 +155,7 @@ function PlantsDirectory() {
 
       {/* Main Grid: Filters + Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        
+
         {/* Left Side: Filter Panel */}
         <aside className="space-y-6 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 h-fit shadow-sm">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -266,7 +266,7 @@ function PlantsDirectory() {
 
         {/* Right Side: Plants List Grid */}
         <div className="lg:col-span-3 space-y-8">
-          
+
           {/* Status Bar */}
           <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
             <span>
@@ -321,17 +321,16 @@ function PlantsDirectory() {
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              
+
               <div className="flex items-center gap-1.5">
                 {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
                   <button
                     key={p}
                     onClick={() => handlePageChange(p)}
-                    className={`w-9 h-9 rounded-xl text-xs font-bold transition ${
-                      p === page
+                    className={`w-9 h-9 rounded-xl text-xs font-bold transition ${p === page
                         ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/10"
                         : "border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-850"
-                    }`}
+                      }`}
                   >
                     {p}
                   </button>

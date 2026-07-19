@@ -133,7 +133,7 @@ export default function AdminFeedbackPage() {
   const fetchFeedbacks = useCallback(async () => {
     if (!userId) return;
     try {
-      const res = await fetch("http://localhost:5000/api/feedbacks/user", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/feedbacks/user`, {
         headers: { "X-User-ID": userId },
       });
       const data = await res.json();
