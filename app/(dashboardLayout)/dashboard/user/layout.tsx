@@ -1,10 +1,22 @@
 "use client";
 
-import React from "react";
-import { useRequireRole } from "@/lib/requireRole";
+import React, { useEffect } from "react";
+import { useSession } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export default function UserLayout({ children }: { children: React.ReactNode }) {
-  const { session, isPending } = useRequireRole("user", "/auth/signin");
+  const { data: session, isPending } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isPending) return;
+    if (!session) {
+      // Not logged in — redirect to sign in
+      const current = window.location.pathname;
+      router.replace(`/auth/signin?redirectTo=${encodeURIComponent(current)}`);
+    }
+    // Allow both "user" and "admin" roles — no role restriction here
+  }, [session, isPending, router]);
 
   if (isPending) {
     return (
@@ -20,3 +32,4 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
 
   return <>{children}</>;
 }
+

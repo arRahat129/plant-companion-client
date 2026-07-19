@@ -29,6 +29,7 @@ export function useRequireRole(
       return;
     }
 
+    // Access role — works with both typed (inferAdditionalFields) and any-cast
     const userRole = (session.user as any).role as string | undefined;
 
     if (userRole !== requiredRole) {
@@ -39,3 +40,4 @@ export function useRequireRole(
 
   return { session, isPending };
 }
+

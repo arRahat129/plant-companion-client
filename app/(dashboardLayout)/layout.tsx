@@ -31,6 +31,7 @@ const navItemsByRole: Record<
 > = {
   admin: [
     { name: "Admin Panel", href: "/dashboard/admin", icon: ShieldCheck },
+    { name: "All Plants", href: "/dashboard/admin/all-plants", icon: Sprout },
     { name: "Analytics", href: "/dashboard/admin", icon: BarChart3 },
     { name: "User Dashboard", href: "/dashboard/user", icon: User },
     { name: "Settings", href: "/dashboard/user", icon: Settings },
@@ -42,6 +43,7 @@ const navItemsByRole: Record<
     { name: "Disease Check", href: "/disease-check", icon: Bug },
     { name: "Plant Doctor", href: "/plant-doctor", icon: Stethoscope },
     { name: "Add Plant", href: "/dashboard/user/add-plant", icon: Plus },
+    { name: "Admin Feedback", href: "/dashboard/user/adminFeedback", icon: ShieldCheck },
     { name: "Settings", href: "/dashboard/user", icon: Settings },
   ],
 };
@@ -178,7 +180,9 @@ export default function DashboardLayout({
         <nav className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+          const isActive = item.href === "/dashboard/admin"
+            ? pathname === item.href
+            : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.name}
