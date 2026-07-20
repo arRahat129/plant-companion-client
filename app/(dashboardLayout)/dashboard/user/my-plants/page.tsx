@@ -106,7 +106,7 @@ export default function MyPlantsPage() {
       });
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL}/api/my-plants?${params}`,
+        `${process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000'}/api/my-plants?${params}`,
         {
           credentials: "include",
           headers: { "X-User-ID": userId }, // ← the real fix
@@ -133,7 +133,7 @@ export default function MyPlantsPage() {
   /* ── Toggle Availability ───────────────────────────────── */
   const handleToggleAvailability = async (id: string, newAvailability: string) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/my-plants/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000'}/api/my-plants/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", "X-User-ID": userId! },
         body: JSON.stringify({ availability: newAvailability }),

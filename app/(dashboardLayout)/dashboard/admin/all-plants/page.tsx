@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -124,7 +124,7 @@ function SendFeedbackModal({
     }
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/feedbacks`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000'}/api/feedbacks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -379,7 +379,7 @@ export default function AdminAllPlantsPage() {
       if (search) q.set("search", search);
       if (statusFilter !== "All") q.set("status", statusFilter);
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/plants?${q.toString()}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000'}/api/admin/plants?${q.toString()}`);
       const data = await res.json();
       if (data.success) {
         setPlants(data.plants);
@@ -436,7 +436,7 @@ export default function AdminAllPlantsPage() {
       action: async () => {
         setActionLoading(plant._id + newStatus);
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/plants/${plant._id}/status`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000'}/api/admin/plants/${plant._id}/status`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ status: newStatus }),
@@ -468,7 +468,7 @@ export default function AdminAllPlantsPage() {
       action: async () => {
         setActionLoading(plant._id + "delete");
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/plants/${plant._id}`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000'}/api/admin/plants/${plant._id}`, {
             method: "DELETE",
           });
           const data = await res.json();

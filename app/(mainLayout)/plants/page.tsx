@@ -79,7 +79,7 @@ function PlantsDirectory() {
         query.set("page", String(page));
         query.set("limit", "9");
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/plants?${query.toString()}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000'}/api/plants?${query.toString()}`);
         const data = await res.json();
         if (data.success) {
           setPlants(data.plants);
@@ -182,7 +182,7 @@ function PlantsDirectory() {
                 placeholder="e.g. Monstera..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="w-full pl-3 pr-9 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+                className="w-full pl-3 pr-9 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
               />
               <button
                 type="submit"
@@ -202,7 +202,7 @@ function PlantsDirectory() {
             <select
               value={category}
               onChange={(e) => updateQuery({ category: e.target.value })}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
             >
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
@@ -220,7 +220,7 @@ function PlantsDirectory() {
             <select
               value={potSize}
               onChange={(e) => updateQuery({ potSize: e.target.value })}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
             >
               {potSizes.map((size) => (
                 <option key={size} value={size}>
@@ -254,7 +254,7 @@ function PlantsDirectory() {
             <select
               value={currentSortValue}
               onChange={(e) => handleSortChange(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
             >
               <option value="createdAt-desc">Newest Listings</option>
               <option value="createdAt-asc">Oldest Listings</option>
@@ -328,8 +328,8 @@ function PlantsDirectory() {
                     key={p}
                     onClick={() => handlePageChange(p)}
                     className={`w-9 h-9 rounded-xl text-xs font-bold transition ${p === page
-                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/10"
-                        : "border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-850"
+                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/10"
+                      : "border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-850"
                       }`}
                   >
                     {p}

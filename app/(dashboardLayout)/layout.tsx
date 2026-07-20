@@ -22,6 +22,7 @@ import {
   Menu,
   X,
   Inbox,
+  Users,
 } from "lucide-react";
 
 // Nav items keyed by role
@@ -31,20 +32,19 @@ const navItemsByRole: Record<
 > = {
   admin: [
     { name: "Admin Panel", href: "/dashboard/admin", icon: ShieldCheck },
+    { name: "Manage Users", href: "/dashboard/admin/users", icon: Users },
     { name: "All Plants", href: "/dashboard/admin/all-plants", icon: Sprout },
-    { name: "Analytics", href: "/dashboard/admin", icon: BarChart3 },
-    { name: "User Dashboard", href: "/dashboard/user", icon: User },
-    { name: "Settings", href: "/dashboard/user", icon: Settings },
   ],
   user: [
     { name: "My Dashboard", href: "/dashboard/user", icon: User },
     { name: "My Plants", href: "/dashboard/user/my-plants", icon: Sprout },
     { name: "Requests", href: "/dashboard/user/requests", icon: Inbox },
+    { name: "Scan History", href: "/dashboard/user/scans", icon: Bug },
     { name: "Disease Check", href: "/disease-check", icon: Bug },
     { name: "Plant Doctor", href: "/plant-doctor", icon: Stethoscope },
     { name: "Add Plant", href: "/dashboard/user/add-plant", icon: Plus },
     { name: "Admin Feedback", href: "/dashboard/user/adminFeedback", icon: ShieldCheck },
-    { name: "Settings", href: "/dashboard/user", icon: Settings },
+    { name: "Profile", href: "/dashboard/user/profile", icon: Settings },
   ],
 };
 
@@ -299,7 +299,7 @@ export default function DashboardLayout({
       </aside>
 
       {/* ── Main content ── */}
-      <main className="flex-1 p-6 md:p-8 overflow-y-auto w-full max-w-7xl mx-auto">
+      <main className="flex-1 p-6 md:p-8 w-full max-w-7xl mx-auto">
         {children}
       </main>
     </div>

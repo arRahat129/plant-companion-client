@@ -3,93 +3,49 @@
 import { motion } from "framer-motion";
 import ProductCard from "../ui/ProductCard";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
-// Placeholder data for 8 products
-const featuredProducts = [
-  {
-    id: "p1",
-    title: "Monstera Deliciosa",
-    description: "A beautiful, easy-to-care-for indoor plant with iconic split leaves.",
-    price: 45.00,
-    image: "https://images.unsplash.com/photo-1614594975525-e45190c55d40?q=80&w=800&auto=format&fit=crop",
-    rating: 4.8,
-    location: "New York, NY",
-    category: "Indoor",
-  },
-  {
-    id: "p2",
-    title: "Fiddle Leaf Fig",
-    description: "Tall, sculptural plant with large, glossy, violin-shaped leaves.",
-    price: 65.00,
-    image: "https://images.unsplash.com/photo-1597055181308-e4b2d3bf73cb?q=80&w=800&auto=format&fit=crop",
-    rating: 4.6,
-    location: "Los Angeles, CA",
-    category: "Indoor",
-  },
-  {
-    id: "p3",
-    title: "Snake Plant",
-    description: "Extremely resilient plant that thrives on neglect and purifies air.",
-    price: 25.00,
-    image: "https://images.unsplash.com/photo-1599081515228-b0a660a9f5d3?q=80&w=800&auto=format&fit=crop",
-    rating: 4.9,
-    location: "Chicago, IL",
-    category: "Succulents",
-  },
-  {
-    id: "p4",
-    title: "ZZ Plant",
-    description: "Drought-tolerant plant with waxy, smooth, dark green leaves.",
-    price: 35.00,
-    image: "https://images.unsplash.com/photo-1632207691143-643e2a9a9361?q=80&w=800&auto=format&fit=crop",
-    rating: 4.7,
-    location: "Austin, TX",
-    category: "Indoor",
-  },
-  {
-    id: "p5",
-    title: "Aloe Vera",
-    description: "A practical succulent known for its soothing medicinal gel.",
-    price: 18.00,
-    image: "https://images.unsplash.com/photo-1596547609652-9fc5d8d428ce?q=80&w=800&auto=format&fit=crop",
-    rating: 4.5,
-    location: "Miami, FL",
-    category: "Succulents",
-  },
-  {
-    id: "p6",
-    title: "Peace Lily",
-    description: "Elegant dark foliage and beautiful white hooded flowers.",
-    price: 30.00,
-    image: "https://images.unsplash.com/photo-1593691509543-c55fb32e7355?q=80&w=800&auto=format&fit=crop",
-    rating: 4.4,
-    location: "Seattle, WA",
-    category: "Indoor",
-  },
-  {
-    id: "p7",
-    title: "Golden Pothos",
-    description: "Fast-growing trailing vine that's nearly impossible to kill.",
-    price: 22.00,
-    image: "https://images.unsplash.com/photo-1600411326887-841f3e790a6f?q=80&w=800&auto=format&fit=crop",
-    rating: 4.9,
-    location: "Denver, CO",
-    category: "Indoor",
-  },
-  {
-    id: "p8",
-    title: "Bird of Paradise",
-    description: "Stunning tropical plant with large, banana-like leaves.",
-    price: 85.00,
-    image: "https://images.unsplash.com/photo-1616688796582-77ebdae605d3?q=80&w=800&auto=format&fit=crop",
-    rating: 4.7,
-    location: "San Diego, CA",
-    category: "Outdoor",
-  },
-];
+interface PlantItem {
+  _id: string;
+  title: string;
+  description: string;
+  price: number;
+  images?: string[];
+  category: string;
+}
 
 export default function FeaturedProducts() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000'}/api/plants?limit=8`);
+        const data = await res.json();
+        if (data.success && data.plants) {
+          const mapped = data.plants.map((p: PlantItem) => ({
+            id: p._id,
+            title: p.title,
+            description: p.description || "Beautiful organic grown plant.",
+            price: p.price || 0,
+            image: p.images?.[0] || "https://i.ibb.co.com/N0JFXfB/image.png",
+            rating: 4.8,
+            location: "Local Seller",
+            category: p.category || "Indoor",
+          }));
+          setProducts(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to load featured products", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
   return (
     <section className="py-20 bg-default-50">
       <div className="max-w-7xl mx-auto px-6">
@@ -108,19 +64,29 @@ export default function FeaturedProducts() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProducts.map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
-            >
-              <ProductCard {...product} />
-            </motion.div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-16 text-default-400">
+            No plants listed in the marketplace yet.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products.map((product, index) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+              >
+                <ProductCard {...product} />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

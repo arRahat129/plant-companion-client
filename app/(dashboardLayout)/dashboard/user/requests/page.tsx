@@ -21,7 +21,7 @@ export default function RequestsPage() {
     if (!userId) return;
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/requests`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000'}/api/requests`, {
         headers: { "X-User-ID": userId },
       });
       const data = await res.json();

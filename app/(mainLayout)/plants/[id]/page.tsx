@@ -111,7 +111,7 @@ export default function PlantDetailPage() {
     if (!id || !session) return;
     const fetchPlant = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/plants/${id}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000'}/api/plants/${id}`);
         if (res.status === 404) { setNotFound(true); return; }
         const json = await res.json();
         if (json.success) setPlant(json.plant);
