@@ -53,7 +53,7 @@ export default function UserDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">User Dashboard</h1>
+        <h1 className="text-2xl font-bold text-black/90 dark:text-white">User Dashboard</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           Welcome back, <span className="font-semibold text-emerald-600">{session?.user.name}</span>. Here is your garden overview.
         </p>

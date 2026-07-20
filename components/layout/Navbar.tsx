@@ -110,7 +110,7 @@ export default function Navbar() {
                   <Link
                     href="/dashboard"
                     onClick={() => setIsProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-250 hover:bg-slate-100 dark:hover:bg-slate-850"
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-850 dark:hover:text-slate-900"
                   >
                     <LayoutDashboard size={16} />
                     Dashboard

@@ -246,7 +246,7 @@ export default function DashboardLayout({
   );
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen transition-colors duration-200 bg-slate-50 dark:bg-slate-950">
+    <div className="flex flex-col md:flex-row min-h-screen transition-colors duration-200">
       {/* ── Mobile Top Header ── */}
       <header className="flex md:hidden items-center justify-between h-16 px-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 transition-colors duration-200">
         <button

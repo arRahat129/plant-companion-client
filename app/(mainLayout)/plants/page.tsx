@@ -205,7 +205,7 @@ function PlantsDirectory() {
               className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
             >
               {categories.map((cat) => (
-                <option key={cat} value={cat}>
+                <option className="bg-white dark:bg-black/80" key={cat} value={cat}>
                   {cat}
                 </option>
               ))}
@@ -223,7 +223,7 @@ function PlantsDirectory() {
               className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
             >
               {potSizes.map((size) => (
-                <option key={size} value={size}>
+                <option className="bg-white dark:bg-black/80" key={size} value={size}>
                   {size}
                 </option>
               ))}
@@ -256,10 +256,10 @@ function PlantsDirectory() {
               onChange={(e) => handleSortChange(e.target.value)}
               className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
             >
-              <option value="createdAt-desc">Newest Listings</option>
-              <option value="createdAt-asc">Oldest Listings</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
+              <option className="bg-white dark:bg-black/80" value="createdAt-desc">Newest Listings</option>
+              <option className="bg-white dark:bg-black/80" value="createdAt-asc">Oldest Listings</option>
+              <option className="bg-white dark:bg-black/80" value="price-asc">Price: Low to High</option>
+              <option className="bg-white dark:bg-black/80" value="price-desc">Price: High to Low</option>
             </select>
           </div>
         </aside>
