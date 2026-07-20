@@ -4,6 +4,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { X, Calendar, MessageSquare, Mail, User, Info, Check, Trash2, Edit2, Save } from "lucide-react";
 import { API_BASE } from "@/lib/apiBase";
+import { useSession } from "@/lib/auth-client";
 
 interface RequestManageModalProps {
   request: any;

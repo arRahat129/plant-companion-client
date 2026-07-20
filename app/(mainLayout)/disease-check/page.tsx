@@ -4,8 +4,8 @@ import React, { useState, useRef, ClipboardEvent, DragEvent, ChangeEvent, useEff
 import { Button, Card, Alert } from "@heroui/react";
 import html2canvas from 'html2canvas-pro';
 import { jsPDF } from "jspdf";
-import { Upload, X, ClipboardPlus, RefreshCw, Camera } from "lucide-react";
-import ReactMarkdown from 'react-markdown'; // 👈 Formats markdown response safely
+import { Upload, X, ClipboardPlus, RefreshCw, Camera, FileDown, RotateCcw, Scan, Shield, Activity, Leaf } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
 import { toast } from "react-hot-toast";
 import { useSession } from "@/lib/auth-client";
 
@@ -31,17 +31,19 @@ export default function DiseaseCheckPage() {
   const [scanCount, setScanCount] = useState<number | null>(null);
   const [plantName, setPlantName] = useState<string | null>(null);
   const [diseaseName, setDiseaseName] = useState<string | null>(null);
+  const [scanStage, setScanStage] = useState<string>("");
 
   // Camera states
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch scan count on mount or session changes
   useEffect(() => {
     if (session?.user?.id) {
-      fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/diseases/count`, {
+      fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/diseases/count`, {
         headers: {
           "x-user-id": session.user.id,
         },
@@ -77,7 +79,6 @@ export default function DiseaseCheckPage() {
       setCameraStream(stream);
       setIsCameraActive(true);
       setError(null);
-      // Wait for ref connection
       setTimeout(() => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -109,7 +110,6 @@ export default function DiseaseCheckPage() {
         const dataUrl = canvas.toDataURL("image/jpeg");
         setImage(dataUrl);
 
-        // Convert to file
         const blobBin = atob(dataUrl.split(',')[1]);
         const array = [];
         for (let i = 0; i < blobBin.length; i++) {
@@ -117,8 +117,6 @@ export default function DiseaseCheckPage() {
         }
         const file = new File([new Uint8Array(array)], `camera_${Date.now()}.jpg`, { type: "image/jpeg" });
         setRawFile(file);
-
-        // Stop stream
         stopCamera();
       }
     }
@@ -200,6 +198,7 @@ export default function DiseaseCheckPage() {
     setError(null);
     setPlantName(null);
     setDiseaseName(null);
+    setScanStage("");
   };
 
   const handleScanExecute = async () => {
@@ -215,11 +214,17 @@ export default function DiseaseCheckPage() {
     setPlantName(null);
     setDiseaseName(null);
 
+    // Animated scan stages
+    setScanStage("Uploading image data...");
+    await new Promise(r => setTimeout(r, 600));
+    setScanStage("Running AI image classification...");
+    await new Promise(r => setTimeout(r, 800));
+    setScanStage("Generating pathology report...");
+
     try {
-      // Extract the base64 string safely out of the data URL
       const base64Data = image.split(",")[1];
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/diseases/scan`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/diseases/scan`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -237,6 +242,7 @@ export default function DiseaseCheckPage() {
       const result: ScanResponse = await response.json();
 
       if (response.ok && result.success && result.data) {
+        setScanStage("Analysis complete ✓");
         setReport(result.data.reportMarkdown);
         setPlantName(result.data.plantName || "Plant");
         setDiseaseName(result.data.diseaseName || "Disease");
@@ -294,20 +300,30 @@ export default function DiseaseCheckPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      {/* Hero Header */}
       <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold mb-3 text-slate-900 dark:text-white">🌿 AI Plant Disease Check</h1>
-        <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-          Upload, drag, or paste a photograph of a plant leaf or structure to diagnose stresses and target treatment solutions instantly.
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-full text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-4">
+          <Shield className="w-3.5 h-3.5" />
+          AI-Powered Plant Pathology
+        </div>
+        <h1 className="text-3xl sm:text-4xl font-bold mb-3 text-slate-900 dark:text-white">
+          Plant Disease Scanner
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto text-sm sm:text-base">
+          Upload or capture a photo of your plant leaf. Our AI will identify diseases, assess severity, and recommend treatment solutions.
         </p>
         {scanCount !== null && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/30 text-[#244D3F] dark:text-emerald-400 rounded-full text-xs font-semibold mt-4">
-            📊 You have performed {scanCount} disease checks
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-full text-xs font-medium mt-4">
+            <Activity className="w-3 h-3" />
+            {scanCount} scan{scanCount !== 1 ? 's' : ''} performed
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start mb-10">
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start mb-10">
+        {/* Left: Upload Zone */}
         <div
           onPaste={handlePaste}
           onDragOver={handleDragOver}
@@ -316,71 +332,81 @@ export default function DiseaseCheckPage() {
           className="focus:outline-none outline-none"
           tabIndex={0}
         >
-          <Card
-            className={`border-2 border-dashed rounded-2xl shadow-none bg-transparent transition-all duration-200 ${isDragging
-              ? "border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/10 scale-[1.01]"
-              : "border-slate-200 dark:border-slate-800"
+          <div
+            className={`border-2 border-dashed rounded-2xl transition-all duration-200 ${isDragging
+              ? "border-emerald-500 bg-emerald-50/30 dark:bg-emerald-950/20 scale-[1.01]"
+              : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
               }`}
           >
-            <div className="flex flex-col items-center justify-center p-6 min-h-[320px]">
+            <div className="flex flex-col items-center justify-center p-6 min-h-[360px]">
               {isCameraActive ? (
                 <div className="w-full flex flex-col gap-4">
-                  <div className="relative rounded-xl overflow-hidden aspect-video bg-slate-900 border border-slate-200 dark:border-slate-800">
+                  <div className="relative rounded-xl overflow-hidden aspect-video bg-slate-900 border border-slate-200 dark:border-slate-700">
                     <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 border-2 border-emerald-400/30 rounded-xl pointer-events-none" />
                   </div>
                   <div className="flex gap-3">
                     <Button
                       size="sm"
-                      className="w-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                      className="w-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium"
                       onClick={stopCamera}
                     >
                       Cancel
                     </Button>
                     <Button
                       size="sm"
-                      className="w-full bg-[#244D3F] text-white flex items-center justify-center gap-2"
+                      className="w-full bg-emerald-600 text-white flex items-center justify-center gap-2 font-medium"
                       onClick={capturePhoto}
                     >
                       <Camera className="w-4 h-4" />
-                      Capture Photo
+                      Capture
                     </Button>
                   </div>
                 </div>
               ) : image ? (
                 <div className="w-full h-full flex flex-col gap-4">
-                  <div className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 aspect-video bg-slate-900">
-                    <img src={image} alt="Target leaf upload" className="w-full h-full object-contain" />
+                  <div className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 aspect-video bg-slate-950">
+                    <img src={image} alt="Uploaded plant" className="w-full h-full object-contain" />
                     <button
                       type="button"
                       onClick={resetUploadState}
-                      className="absolute top-2 right-2 p-1.5 bg-black/70 text-white rounded-full hover:bg-black/90 transition"
+                      className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-full hover:bg-black/80 transition backdrop-blur-sm"
                       title="Clear image"
                     >
                       <X className="w-4 h-4" />
                     </button>
+                    {rawFile && (
+                      <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md text-xs text-white/80">
+                        {rawFile.name} · {(rawFile.size / 1024).toFixed(0)}KB
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex gap-3">
                     <Button
                       size="sm"
-                      className="w-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                      className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium flex items-center justify-center gap-2"
                       onClick={resetUploadState}
                     >
+                      <RotateCcw className="w-3.5 h-3.5" />
                       Reset
                     </Button>
                     <Button
                       size="sm"
-                      className="w-full bg-[#244D3F] text-white flex items-center justify-center gap-2"
+                      className="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 font-medium transition-colors"
                       isDisabled={isScanning}
                       onClick={handleScanExecute}
                     >
                       {isScanning ? (
                         <>
                           <RefreshCw className="w-4 h-4 animate-spin" />
-                          <span>Processing...</span>
+                          <span>Analyzing...</span>
                         </>
                       ) : (
-                        "Run Diagnostics"
+                        <>
+                          <Scan className="w-4 h-4" />
+                          <span>Run Diagnostics</span>
+                        </>
                       )}
                     </Button>
                   </div>
@@ -388,7 +414,7 @@ export default function DiseaseCheckPage() {
               ) : (
                 <div className="w-full flex flex-col items-center justify-center">
                   <label
-                    className="flex flex-col items-center justify-center cursor-pointer text-center group w-full py-8"
+                    className="flex flex-col items-center justify-center cursor-pointer text-center group w-full py-10"
                     onClick={(e) => {
                       if (!session?.user) {
                         e.preventDefault();
@@ -396,46 +422,64 @@ export default function DiseaseCheckPage() {
                       }
                     }}
                   >
-                    <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 rounded-full text-[#244D3F] mb-4 group-hover:scale-105 transition-transform flex items-center justify-center">
-                      <Upload className="w-6 h-6" />
+                    <div className="p-5 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl text-emerald-600 dark:text-emerald-400 mb-4 group-hover:scale-110 transition-transform duration-300">
+                      <Upload className="w-7 h-7" />
                     </div>
-                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                       Browse, drag & drop, or paste image
                     </span>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-2 bg-slate-100 dark:bg-slate-800/60 px-2.5 py-1 rounded-md">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-2 bg-slate-50 dark:bg-slate-800/60 px-3 py-1.5 rounded-lg">
                       <ClipboardPlus className="w-3.5 h-3.5" />
                       <span>Press Ctrl+V or Cmd+V to paste</span>
                     </div>
-                    <span className="text-[11px] text-slate-400 mt-2">Supports PNG, JPG up to 10MB</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={!session?.user} />
+                    <span className="text-[11px] text-slate-400 mt-2.5">Supports PNG, JPG up to 10MB</span>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                      disabled={!session?.user}
+                    />
                   </label>
 
                   {session?.user && (
                     <Button
                       size="sm"
-                      className="mt-2 text-xs flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/30 text-[#244D3F] dark:text-emerald-400 font-semibold"
+                      className="text-xs flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                       onClick={startCamera}
                     >
                       <Camera className="w-4 h-4" />
-                      Use Camera Stream
+                      Use Camera
                     </Button>
                   )}
                 </div>
               )}
             </div>
-          </Card>
+          </div>
         </div>
 
-        <Card className="h-full min-h-[320px] flex items-center justify-center border border-slate-100 dark:border-slate-900 shadow-md">
+        {/* Right: Status Panel */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 min-h-[360px] flex items-center justify-center">
           <div className="p-6 flex flex-col justify-center items-center w-full">
             {isScanning && (
-              <div className="w-full text-center space-y-4">
-                <RefreshCw className="w-8 h-8 mx-auto text-[#244D3F] animate-spin" />
-                <h3 className="font-semibold text-slate-800 dark:text-slate-200">
-                  Cross-Referencing Pathogens...
-                </h3>
-                <div className="w-full max-w-xs mx-auto bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#244D3F] h-full animate-pulse w-full" />
+              <div className="w-full text-center space-y-5">
+                <div className="relative mx-auto w-16 h-16">
+                  <div className="absolute inset-0 rounded-full border-[3px] border-emerald-100 dark:border-emerald-900/30" />
+                  <div className="absolute inset-0 rounded-full border-[3px] border-t-emerald-500 animate-spin" />
+                  <Leaf className="absolute inset-0 m-auto w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                    Scanning in Progress
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 animate-pulse">
+                    {scanStage}
+                  </p>
+                </div>
+                <div className="w-full max-w-xs mx-auto bg-slate-100 dark:bg-slate-800 h-1 rounded-full overflow-hidden">
+                  <div className="bg-emerald-500 h-full rounded-full animate-[scan-progress_3s_ease-in-out_infinite]"
+                    style={{ animation: 'scan-progress 3s ease-in-out infinite', width: '70%' }} />
                 </div>
               </div>
             )}
@@ -443,55 +487,72 @@ export default function DiseaseCheckPage() {
             {error && (
               <Alert color="danger">
                 <div className="flex flex-col gap-0.5 text-left">
-                  <span className="font-bold text-sm text-red-800 dark:text-red-200">Diagnostic Flag</span>
+                  <span className="font-bold text-sm text-red-800 dark:text-red-200">Diagnostic Error</span>
                   <span className="text-xs text-red-700 dark:text-red-300">{error}</span>
                 </div>
               </Alert>
             )}
 
             {!isScanning && !report && !error && (
-              <p className="text-sm text-slate-400 text-center italic max-w-[240px]">
-                Awaiting content... Upload or paste your asset to initialize diagnostic sequence.
-              </p>
+              <div className="text-center space-y-3">
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl inline-flex">
+                  <Scan className="w-8 h-8 text-slate-300 dark:text-slate-600" />
+                </div>
+                <p className="text-sm text-slate-400 max-w-[240px]">
+                  Upload or capture a plant image to start the AI diagnostic analysis.
+                </p>
+              </div>
             )}
 
             {report && !isScanning && (
-              <div className="w-full">
-                <div className="flex items-center gap-2 text-emerald-600 font-medium mb-2">
-                  <span>✓</span> Analysis Framework Ready
+              <div className="w-full space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center">
+                    <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">Analysis Complete</p>
+                    <p className="text-xs text-slate-500">{plantName} · {diseaseName}</p>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-500">
-                  Scroll down to examine the pathological report architecture or download the official print profile.
+                <p className="text-xs text-slate-400">
+                  Scroll down to review the full diagnostic report or download it as PDF.
                 </p>
               </div>
             )}
           </div>
-        </Card>
+        </div>
       </div>
 
+      {/* Report Section */}
       {report && (
         <div className="space-y-6">
-          {/* Note: Added explicit print overrides here to bypass layout adjustments when rendering the PDF */}
-          <div ref={reportRef} className="p-8 bg-white text-slate-900 rounded-2xl border border-slate-200 shadow-sm space-y-6 print:p-0 print:border-none">
-            <div className="border-b pb-4 flex justify-between items-center">
+          <div ref={reportRef} className="p-6 sm:p-8 bg-white text-slate-900 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div>
-                <h2 className="text-2xl font-bold text-slate-800">Botanical Diagnostic Report</h2>
-                <p className="text-xs text-slate-400 mt-1">Processed via Gemini Pathogen Verification Engine</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Botanical Diagnostic Report</h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  {plantName} · {diseaseName} · Processed via AI Pathology Engine
+                </p>
               </div>
-              <span className="px-3 py-1 bg-emerald-100 text-[#244D3F] rounded-full text-xs font-semibold tracking-wide uppercase">
-                Match Verified
+              <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold tracking-wide uppercase shrink-0">
+                Verified
               </span>
             </div>
 
-            {/* Changed raw rendering block to ReactMarkdown format */}
-            <div className="prose max-w-none text-sm text-slate-700 space-y-2 dark:prose-invert prose-headings:font-bold prose-p:leading-relaxed">
+            <div className="prose max-w-none text-sm text-slate-700 space-y-2 prose-headings:font-bold prose-p:leading-relaxed prose-h3:text-base prose-h3:mt-4 prose-ul:mt-1 prose-li:mt-0">
               <ReactMarkdown>{report}</ReactMarkdown>
             </div>
           </div>
 
           <div className="flex justify-end">
-            <Button size="lg" className="bg-[#244D3F] text-white font-medium" onClick={downloadPDFReport}>
-              📥 Download Diagnostic PDF
+            <Button
+              size="lg"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium flex items-center gap-2 transition-colors"
+              onClick={downloadPDFReport}
+            >
+              <FileDown className="w-4 h-4" />
+              Download Report PDF
             </Button>
           </div>
         </div>
